@@ -1,0 +1,52 @@
+version: "3.8"
+
+networks:
+  corp:
+    driver: bridge
+
+services:
+  mongo:
+    container_name: mongodb
+    image: bitnami/mongodb:6.0.2
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/bitnami/mongodb
+    restart: always
+    environment:
+      - MONGODB_ROOT_PASSWORD=admin
+      - MONGODB_USERNAME=admin
+      - MONGODB_PASSWORD=admin
+      - MONGODB_DATABASE=social_media
+  rabbitmq:
+    image: rabbitmq
+    ports:
+      - '5672:5672'
+
+  gateway:
+    extends:
+      file: docker-compose.base.yml
+      service: nx-app-base
+    command: npm run api-gateway:docker:dev
+    ports:
+      - 3000:3000 # API Entry port
+      - 3333:3333 # Server Debugging port
+    depends_on:
+      - mongo
+      - rabbitmq
+
+  client:
+    extends:
+      file: docker-compose.base.yml
+      service: nx-app-base
+    command: npm run client:docker:dev
+    ports:
+      - 4200:4200
+    depends_on:
+      - mongo
+      - rabbitmq
+
+volumes:
+  mono-node-modules: null
+  mongodb_data:
+    driver: local

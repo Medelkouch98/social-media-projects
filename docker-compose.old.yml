@@ -1,0 +1,89 @@
+version: "3.8"
+
+networks:
+  corp:
+    driver: bridge
+
+services:
+  mongo:
+    container_name: mongodb
+    image: bitnami/mongodb:6.0.2
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/bitnami/mongodb
+    restart: always
+    environment:
+      - MONGODB_ROOT_PASSWORD=admin
+      - MONGODB_USERNAME=admin
+      - MONGODB_PASSWORD=admin
+      - MONGODB_DATABASE=social_media
+  rabbitmq:
+    image: rabbitmq
+    ports:
+      - '5672:5672'
+
+  # social-media:
+  #   image: social-media:nx-base
+  #   build:
+  #     context: ./
+  #     dockerfile: ./Dockerfile
+
+  gateway:
+    build:
+      context: ./
+      cache_from:
+        - social-media:nx-base
+      dockerfile: ./apps/api/gateway/Dockerfile
+      args:
+        NODE_ENV: "development"
+        BUILD_FLAG: ""
+    volumes:
+      - ./apps/api/gateway:/app/builder/apps/api/gateway
+    image: gateway:nx-dev
+    ports:
+      - 3000:3000
+    environment:
+      NODE_ENV: "development"
+      PORT: 3000
+    networks:
+      - corp
+    restart: on-failure
+    depends_on:
+      - mongo
+      - rabbitmq
+      # - social-media
+
+  client:
+    container_name: client
+    build:
+      context: ./
+      cache_from:
+        - nginx:1.23.2-alpine
+      dockerfile: ./apps/client/Dockerfile
+      args:
+        NODE_ENV: "development"
+        BUILD_FLAG: ""
+    image: client:nx-dev
+    ports:
+      - 4200:80
+    volumes:
+      - ./apps/client:/app/builder/apps/client
+    environment:
+      NODE_ENV: "development"
+      PORT: 4200
+    networks:
+      - corp
+    restart: on-failure
+    depends_on:
+      - mongo
+      - rabbitmq
+      # - social-media
+
+volumes:
+  mongodb_data:
+    driver: local
+  api-gateway:
+    driver: local
+  client:
+    driver: local
