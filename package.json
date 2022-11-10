@@ -11,7 +11,7 @@
     "client:docker:dev": "npx nx serve client --host=0.0.0.0 --poll 5000",
     "api-gateway:docker:dev": "npx nx serve api-gateway --host=0.0.0.0",
     "docker:base:build": "docker build . -t social-media:nx-base",
-    "docker:dev": "docker-compose up --build"
+    "docker:dev": "docker:base:build && docker-compose up --build"
   },
   "private": true,
   "dependencies": {
