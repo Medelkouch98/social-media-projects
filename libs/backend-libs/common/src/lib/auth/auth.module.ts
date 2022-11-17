@@ -4,7 +4,7 @@ import { RmqModule } from '../rmq/rmq.module';
 import { AUTH_SERVICE } from './services';
 
 @Module({
-  imports: [RmqModule.register({ name: AUTH_SERVICE })],
+  imports: [RmqModule.register([{ name: AUTH_SERVICE }])],
   exports: [RmqModule],
 })
 export class AuthModule implements NestModule {

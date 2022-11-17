@@ -7,13 +7,15 @@
     "build": {
       "executor": "@nrwl/webpack:webpack",
       "outputs": ["{options.outputPath}"],
+      "builder": "@nrwl/node:build",
       "options": {
         "target": "node",
         "compiler": "tsc",
         "outputPath": "dist/apps/api/search",
         "main": "apps/api/search/src/main.ts",
         "tsConfig": "apps/api/search/tsconfig.app.json",
-        "assets": ["apps/api/search/src/assets"]
+        "assets": ["apps/api/search/src/assets"],
+        "poll": 6000
       },
       "configurations": {
         "production": {

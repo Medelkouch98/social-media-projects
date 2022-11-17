@@ -7,13 +7,15 @@
     "build": {
       "executor": "@nrwl/webpack:webpack",
       "outputs": ["{options.outputPath}"],
+      "builder": "@nrwl/node:build",
       "options": {
         "target": "node",
         "compiler": "tsc",
         "outputPath": "dist/apps/api/communication",
         "main": "apps/api/communication/src/main.ts",
         "tsConfig": "apps/api/communication/tsconfig.app.json",
-        "assets": ["apps/api/communication/src/assets"]
+        "assets": ["apps/api/communication/src/assets"],
+        "poll": 3000
       },
       "configurations": {
         "production": {

@@ -1,8 +1,8 @@
 version: "3.8"
 
-networks:
-  corp:
-    driver: bridge
+# networks:
+#   corp:
+#     driver: bridge
 
 services:
   mongo:
@@ -18,35 +18,151 @@ services:
       - MONGODB_USERNAME=admin
       - MONGODB_PASSWORD=admin
       - MONGODB_DATABASE=social_media
+  # user/password: guest/guest
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:3.9.25-management
     ports:
       - '5672:5672'
-
-  gateway:
-    extends:
-      file: docker-compose.base.yml
-      service: nx-app-base
-    command: npm run api-gateway:docker:dev
+      - '15672:15672'
+  elasticsearch:
+    image: bitnami/elasticsearch:8.5.0
     ports:
-      - 3000:3000 # API Entry port
-      - 3333:3333 # Server Debugging port
-    depends_on:
-      - mongo
-      - rabbitmq
-
-  client:
-    extends:
-      file: docker-compose.base.yml
-      service: nx-app-base
-    command: npm run client:docker:dev
+      - '9200:9200'
+      - '9300:9300'
+    volumes:
+      - 'elasticsearch_data:/bitnami/elasticsearch/data'
+  postgresql:
+    image: bitnami/postgresql:15.1.0
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - POSTGRESQL_USERNAME=admin
+      - POSTGRESQL_PASSWORD=password
+      - POSTGRESQL_DATABASE=kc_social_media
     ports:
-      - 4200:4200
+      - '5432:5432'
+    volumes:
+      - 'postgresql_data:/bitnami/postgresql'
+
+  keycloak:
+    image: bitnami/keycloak:20.0.1
     depends_on:
-      - mongo
-      - rabbitmq
+      - postgresql
+    ports:
+      - "8080:8080"
+    environment:
+      - KEYCLOAK_CREATE_ADMIN_USER=true
+      - KEYCLOAK_ADMIN_USER=admin
+      - KEYCLOAK_ADMIN_PASSWORD=password
+      - KEYCLOAK_DATABASE_NAME=kc_social_media
+      - KEYCLOAK_DATABASE_USER=admin
+      - KEYCLOAK_DATABASE_PASSWORD=password
+
+  # krakend:
+  #   image: devopsfaith/krakend:watch
+  #   ports:
+  #     - "1234:1234"
+  #     - "8081:8080"
+  #     - "8090:8090"
+  #   volumes:
+  #     - ./config/krakend/:/etc/krakend/
+  #   command: ["run", "-d", "-c", "/etc/krakend/krakend.json"]
 
 volumes:
   mono-node-modules: null
   mongodb_data:
     driver: local
+  postgresql_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+  # communication:
+  #   extends:
+  #     file: docker-compose.base.yml
+  #     service: nx-app-base
+  #   command: npm run api-communication:docker:dev
+  #   ports:
+  #     - 3005:3005
+  #     - 3338:3338
+  #   depends_on:
+  #     - mongo
+  #     - rabbitmq
+
+  # media:
+  #   extends:
+  #     file: docker-compose.base.yml
+  #     service: nx-app-base
+  #   command: npm run api-media:docker:dev
+  #   ports:
+  #     - 3004:3004
+  #     - 3337:3337
+  #   depends_on:
+  #     - mongo
+  #     - rabbitmq
+
+  # search:
+  #   extends:
+  #     file: docker-compose.base.yml
+  #     service: nx-app-base
+  #   command: npm run api-search:docker:dev
+  #   ports:
+  #     - 3003:3003
+  #     - 3336:3336
+  #   depends_on:
+  #     - mongo
+  #     - rabbitmq
+  #     - elasticsearch
+
+  # tags:
+  #   extends:
+  #     file: docker-compose.base.yml
+  #     service: nx-app-base
+  #   command: npm run api-tags:docker:dev
+  #   ports:
+  #     - 3002:3002
+  #     - 3335:3335
+  #   depends_on:
+  #     - mongo
+  #     - rabbitmq
+
+  # posts:
+  #   extends:
+  #     file: docker-compose.base.yml
+  #     service: nx-app-base
+  #   command: npm run api-posts:docker:dev
+  #   ports:
+  #     - 3001:3001
+  #     - 3334:3334
+  #   depends_on:
+  #     - mongo
+  #     - rabbitmq
+
+  # gateway:
+  #   extends:
+  #     file: docker-compose.base.yml
+  #     service: nx-app-base
+  #   command: npm run api-gateway:docker:dev
+  #   networks:
+  #     - corp
+  #   ports:
+  #     - 3000:3000
+  #     - 3333:3333
+  #   depends_on:
+  #     - mongo
+  #     - rabbitmq
+  #     - posts
+  #     - tags
+  #     - search
+  #     - media
+  #     - communication
+
+  # client:
+  #   extends:
+  #     file: docker-compose.base.yml
+  #     service: nx-app-base
+  #   command: npm run client:docker:dev
+  #   ports:
+  #     - 4200:4200
+  #   depends_on:
+  #     - mongo
+  #     - rabbitmq
+

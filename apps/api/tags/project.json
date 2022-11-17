@@ -7,13 +7,15 @@
     "build": {
       "executor": "@nrwl/webpack:webpack",
       "outputs": ["{options.outputPath}"],
+      "builder": "@nrwl/node:build",
       "options": {
         "target": "node",
         "compiler": "tsc",
         "outputPath": "dist/apps/api/tags",
         "main": "apps/api/tags/src/main.ts",
         "tsConfig": "apps/api/tags/tsconfig.app.json",
-        "assets": ["apps/api/tags/src/assets"]
+        "assets": ["apps/api/tags/src/assets"],
+        "poll": 7000
       },
       "configurations": {
         "production": {
