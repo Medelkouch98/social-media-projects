@@ -1,16 +1,12 @@
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import {
-  INestApplication,
-  Logger,
-  ValidationPipe,
-  VersioningType,
-} from '@nestjs/common';
+import { INestApplication, Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app/app.module';
+import { TransformInterceptor } from './interceptors';
 
-const globalPrefix = 'media-api';
+const globalPrefix = 'auth-api';
 const defaultVersion = '1';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -33,22 +29,26 @@ export function setupGlobalMiddlewares(app: INestApplication) {
       type: VersioningType.URI,
       defaultVersion,
     })
+    .useGlobalInterceptors(new TransformInterceptor())
     .useGlobalPipes(
       new ValidationPipe({
         transform: true,
         whitelist: true,
         forbidNonWhitelisted: true,
+        transformOptions: {
+          enableImplicitConversion: true,
+        },
       })
     );
 }
 
 export function setupSwagger(app: INestApplication) {
   const config = new DocumentBuilder()
-    .setTitle('Media API')
-    .setDescription('The media API documentation')
+    .setTitle('Auth API')
+    .setDescription('The auth API documentation')
     .setVersion('0.0.1')
     .addBearerAuth({ type: 'http' })
-    .addTag('MEDIA_API')
+    .addTag('AUTH_API')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(globalPrefix, app, document);

@@ -34,7 +34,8 @@
     "serve": {
       "executor": "@nrwl/js:node",
       "options": {
-        "buildTarget": "api-communication:build"
+        "buildTarget": "api-communication:build",
+        "port": 9231
       },
       "configurations": {
         "production": {

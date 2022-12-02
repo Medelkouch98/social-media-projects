@@ -14,14 +14,24 @@ async function bootstrap() {
 
   // Proxy endpoints
   app.use(
-    '/posts-api',
+    '/auth-api',
     createProxyMiddleware({
-      target: process.env.POSTS_URL,
+      target: process.env.AUTH_URL,
+      changeOrigin: true
+    })
+  );
+
+  app.use(
+    '/media-api',
+    createProxyMiddleware({
+      target: process.env.MEDIA_URL,
+      changeOrigin: true
     })
   );
 
   await app.listen(port);
   Logger.log(`🚀 Application is running on: http://localhost:${port}`);
 }
+
 
 bootstrap();

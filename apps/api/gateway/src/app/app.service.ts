@@ -1,9 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { POSTS_SERVICE } from '../constants/services';
-import { ClientProxy } from '@nestjs/microservices';
-import { lastValueFrom, map, takeLast } from 'rxjs';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
   constructor() {}
+
 }

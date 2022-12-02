@@ -17,7 +17,8 @@
     "paths": {
       "@social-media/backend-libs/common": [
         "libs/backend-libs/common/src/index.ts"
-      ]
+      ],
+      "@social-media/core": ["libs/core/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

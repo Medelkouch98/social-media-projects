@@ -34,7 +34,8 @@
     "serve": {
       "executor": "@nrwl/js:node",
       "options": {
-        "buildTarget": "api-media:build"
+        "buildTarget": "api-media:build",
+        "port": 9232
       },
       "configurations": {
         "production": {

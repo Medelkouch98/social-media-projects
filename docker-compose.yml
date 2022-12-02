@@ -5,20 +5,19 @@ version: "3.8"
 #     driver: bridge
 
 services:
-  mongo:
-    container_name: mongodb
-    image: bitnami/mongodb:6.0.2
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/bitnami/mongodb
-    restart: always
-    environment:
-      - MONGODB_ROOT_PASSWORD=admin
-      - MONGODB_USERNAME=admin
-      - MONGODB_PASSWORD=admin
-      - MONGODB_DATABASE=social_media
-  # user/password: guest/guest
+  # mongo:
+  #   container_name: mongodb
+  #   image: bitnami/mongodb:6.0.2
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongodb_data:/bitnami/mongodb
+  #   restart: always
+  #   environment:
+  #     - MONGODB_ROOT_PASSWORD=admin
+  #     - MONGODB_USERNAME=admin
+  #     - MONGODB_PASSWORD=admin
+  #     - MONGODB_DATABASE=social_media
   rabbitmq:
     image: rabbitmq:3.9.25-management
     ports:
@@ -30,50 +29,69 @@ services:
       - '9200:9200'
       - '9300:9300'
     volumes:
-      - 'elasticsearch_data:/bitnami/elasticsearch/data'
-  postgresql:
+      - elasticsearch_data:/bitnami/elasticsearch/data
+  mediadb:
     image: bitnami/postgresql:15.1.0
     environment:
-      - ALLOW_EMPTY_PASSWORD=yes
       - POSTGRESQL_USERNAME=admin
       - POSTGRESQL_PASSWORD=password
-      - POSTGRESQL_DATABASE=kc_social_media
+      - POSTGRESQL_DATABASE=media
+    ports:
+      - '5433:5432'
+    volumes:
+      - mediadb_data:/var/lib/postgresql/data
+  keycloakdb:
+    image: bitnami/postgresql:15.1.0
+    environment:
+      - POSTGRESQL_USERNAME=admin
+      - POSTGRESQL_PASSWORD=password
+      - POSTGRESQL_DATABASE=keycloack
     ports:
       - '5432:5432'
     volumes:
-      - 'postgresql_data:/bitnami/postgresql'
-
+      - keycloakdb_data:/var/lib/postgresql/data
+  pgadmin:
+    image: dpage/pgadmin4:6.16
+    depends_on:
+      - mediadb
+      - keycloakdb
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.ma
+      - PGADMIN_DEFAULT_PASSWORD=password
+    ports:
+      - '8081:80'
+    volumes:
+      - pgadmin_data:/root/.pgadmin
   keycloak:
     image: bitnami/keycloak:20.0.1
     depends_on:
-      - postgresql
+      - keycloakdb
     ports:
       - "8080:8080"
     environment:
       - KEYCLOAK_CREATE_ADMIN_USER=true
       - KEYCLOAK_ADMIN_USER=admin
       - KEYCLOAK_ADMIN_PASSWORD=password
-      - KEYCLOAK_DATABASE_NAME=kc_social_media
+      - KEYCLOAK_DATABASE_NAME=keycloack
       - KEYCLOAK_DATABASE_USER=admin
       - KEYCLOAK_DATABASE_PASSWORD=password
-
-  # krakend:
-  #   image: devopsfaith/krakend:watch
-  #   ports:
-  #     - "1234:1234"
-  #     - "8081:8080"
-  #     - "8090:8090"
-  #   volumes:
-  #     - ./config/krakend/:/etc/krakend/
-  #   command: ["run", "-d", "-c", "/etc/krakend/krakend.json"]
+      - KEYCLOAK_DATABASE_HOST=keycloakdb
+    volumes:
+      - keycloak_data:/bitnami/keycloak
 
 volumes:
   mono-node-modules: null
-  mongodb_data:
-    driver: local
-  postgresql_data:
-    driver: local
+  # mongodb_data:
+  #   driver: local
   elasticsearch_data:
+    driver: local
+  keycloak_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  mediadb_data:
+    driver: local
+  keycloakdb_data:
     driver: local
   # communication:
   #   extends:
